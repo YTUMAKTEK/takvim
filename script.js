@@ -2,10 +2,6 @@
 const EDIT_PASSWORD = "1324"; // 🔐 change me
 const WEEKS = 16;
 
-/* Start date rule:
-   If today is on/after Sept 29 -> use this year's Sept 29
-   else use last year's Sept 29
-*/
 const START_DATE = new Date(2025, 8, 29);
 
 
@@ -14,8 +10,7 @@ function formatDMY(date) {
   return `${pad2(date.getDate())}.${pad2(date.getMonth() + 1)}.${date.getFullYear()}`;
 }
   
-// helper: go back to Monday of the week containing `d`
-// 
+
 function startOfWeekMonday(d){
     const res = new Date(d);
     const diff = (res.getDay() + 6) % 7; // 0=Sun -> 6; 1=Mon -> 0; ... 6=Sat -> 5
@@ -23,7 +18,7 @@ function startOfWeekMonday(d){
     res.setHours(0,0,0,0);
     return res;
   }
-  
+  /*
   document.getElementById('copyLink')?.addEventListener('click', async () => {
     // Make sure URL reflects the latest data
     writeDataToUrl(loadAll());
@@ -33,17 +28,17 @@ function startOfWeekMonday(d){
       else if (navigator.clipboard) { await navigator.clipboard.writeText(url); alert('Link copied!'); }
       else { prompt('Copy this link:', url); }
     } catch {}
-  });
+  });*/
   
 
 /************ STORAGE *************/
 /* ===== URL ENCODE/DECODE (base64url) ===== */
-window.addEventListener('popstate', () => {
+/*window.addEventListener('popstate', () => {
     const data = readDataFromUrl();
     if (!data) return;
     localStorage.setItem(LS_KEY, JSON.stringify(data));
     days.forEach(d => renderDay(d.date)); // re-render tiles
-  });
+  });*/
   
 function toBase64Url(str){
     const b64 = btoa(unescape(encodeURIComponent(str)));
@@ -95,12 +90,39 @@ function saveAll(data) {
   localStorage.setItem(LS_KEY, JSON.stringify(data));
   writeDataToUrl(data); // keeps the address bar shareable
 }
-function keyForDate(d) {
+/*function keyForDate(d) {
   return d.toISOString().slice(0, 10);
-}
-
+}*/
+function keyForDate(d){
+    const y = d.getFullYear();
+    const m = pad2(d.getMonth()+1);
+    const day = pad2(d.getDate());
+    return `${y}-${m}-${day}`; // e.g., 2025-09-29
+  }
+  
+  function rerenderAll(){
+    (window.days || []).forEach(d => window.renderDay && renderDay(d.date));
+  }
+  
+  /* When user opens a different link via back/forward, refresh UI */
+  window.addEventListener('popstate', () => {
+    const data = readDataFromUrl();
+    if (!data) return;
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+    rerenderAll();
+  });
+  
+  /* On first load, if there’s no ?d= (and no legacy #d=), seed the URL once */
+  document.addEventListener('DOMContentLoaded', () => {
+    const u = new URL(location.href);
+    const hasQuery = u.searchParams.get('d');
+    const hasHash  = location.hash.includes('d=');
+    if (!hasQuery && !hasHash) {
+      writeDataToUrl(loadAll());
+    }
+  });
 /************ SHARE FUNCTIONALITY *************/
-const shareBtn = document.getElementById("shareBtn");
+/*const shareBtn = document.getElementById("shareBtn");
 
 shareBtn.addEventListener("click", async () => {
   const currentUrl = window.location.href;
@@ -153,8 +175,69 @@ function showShareFeedback(message) {
     feedback.style.animation = "slideOut 0.3s ease";
     setTimeout(() => document.body.removeChild(feedback), 300);
   }, 2000);
-}
+}*/
 
+async function shareOrCopyCurrentUrl(){
+    // ensure URL reflects latest data currently in storage
+    writeDataToUrl(loadAll());
+    const currentUrl = location.href;
+  
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Takvim', url: currentUrl });
+        return;
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(currentUrl);
+        showShareFeedback("Link copied to clipboard!");
+        return;
+      }
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = currentUrl;
+      ta.style.position = 'fixed';
+      ta.style.left = '-99999px';
+      ta.style.top  = '-99999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showShareFeedback("Link copied to clipboard!");
+    } catch {
+      prompt("Copy this link:", currentUrl);
+    }
+  }
+  
+  const copyLinkBtn = document.getElementById('copyLink');
+  if (copyLinkBtn) copyLinkBtn.addEventListener('click', shareOrCopyCurrentUrl);
+  
+  const shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) shareBtn.addEventListener('click', shareOrCopyCurrentUrl);
+  
+  function showShareFeedback(message){
+    const feedback = document.createElement("div");
+    feedback.textContent = message;
+    feedback.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #27ae60;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+    document.body.appendChild(feedback);
+    setTimeout(() => {
+      feedback.style.transition = "opacity .25s ease";
+      feedback.style.opacity = "0";
+      setTimeout(() => feedback.remove(), 250);
+    }, 1800);
+  }
+
+  
 // Add CSS for the feedback animation
 const style = document.createElement("style");
 style.textContent = `
