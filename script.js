@@ -27,6 +27,26 @@ function startOfWeekMonday(d){
 
 
 /************ STORAGE *************/
+/* ===== URL HASH STORAGE ===== */
+function toBase64Url(str){
+    const b64 = btoa(unescape(encodeURIComponent(str)));
+    return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function fromBase64Url(b64u){
+    let b64 = b64u.replace(/-/g,'+').replace(/_/g,'/');
+    b64 += '=='.slice(0, (4 - (b64.length % 4)) % 4);
+    return decodeURIComponent(escape(atob(b64)));
+  }
+  function dataToHash(data){
+    const json = JSON.stringify(data);
+    return '#d=' + toBase64Url(json);
+  }
+  function hashToData(hash){
+    const m = (hash || location.hash).match(/(?:#|\?)d=([^&]+)/);
+    if (!m) return null;
+    try { return JSON.parse(fromBase64Url(m[1])); } catch { return null; }
+  }
+  
 const LS_KEY = "club_calendar_v1";
 function loadAll() {
   try {

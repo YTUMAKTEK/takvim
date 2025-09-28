@@ -17,6 +17,24 @@
     color:var(--ink);
     background:linear-gradient(180deg,var(--bg1),var(--bg2));
   }
+
+  .card-container {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    padding: 20px;
+    max-width: 650px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;   
+    margin-bottom: 20px; 
+  }
+  .card-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
   
   .logo-glow {
     width: 30%;
