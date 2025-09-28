@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Takvim</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Takvim</h1>
+    <p class="subtitle">Etkinlik eklemek istediğiniz günün üzerinetıklayın ve şifreyi girin.</p>
+  </header>
+
+  <main class="calendar-shell">
+    <div class="weekdays">
+      <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+    </div>
+
+    <!-- scroll container so 7 columns work on mobile -->
+    <div id="calendar" class="calendar"></div>
+  </main>
+
+  <!-- Modal -->
+  <!-- scroll container so 7 columns work on mobile -->
+  <div id="calendar" class="calendar"></div>
+  <div id="modal" class="modal hidden" aria-hidden="true">
+    
+    <div class="modal-card">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+
+      <!-- Password step -->
+      <section id="pwStep">
+        <h2 id="modalDate"></h2>
+        <p class="muted">Düzenleme yapmak için yönetici şifresini giriniz.</p>
+        <div class="pw-row">
+          <input type="password" id="pwInput" placeholder="Password" />
+          <button id="pwSubmit" class="btn">Unlock</button>
+        </div>
+        <p id="pwError" class="error hidden">Wrong password.</p>
+        <hr />
+        <h3>Etkinlikler(Sadece görüntüleyenler için.)</h3>
+        <div id="viewList" class="event-list-view"></div>
+      </section>
+
+      <!-- Editor step -->
+      <section id="editStep" class="hidden">
+        <h2 id="editDate"></h2>
+
+        <form id="eventForm" class="event-form">
+          <label>
+            Color
+            <input type="color" id="evColor" value="#27ae60" />
+          </label>
+          <label>
+            Start
+            <input type="time" id="evStart" required />
+          </label>
+          <label>
+            End
+            <input type="time" id="evEnd" required />
+          </label>
+          <label class="full">
+            Description
+            <input type="text" id="evDesc" placeholder="e.g., General meeting in Room 201" required />
+          </label>
+          <div class="form-actions">
+            <button type="submit" class="btn primary">Add / Save</button>
+            <button type="button" id="doneEdit" class="btn">Done</button>
+          </div>
+        </form>
+
+        <h3>Events for the day</h3>
+        <div id="editList" class="event-list-edit"></div>
+      </section>
+    </div>
+    
+  </div>
+</body>
+</html>
