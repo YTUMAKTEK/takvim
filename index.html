@@ -9,13 +9,16 @@
 </head>
 <body>
   <header class="topbar">
+    <header>
+        <img src="logo.png" alt="MAKTEK Logo" class="logo-glow" />
+      </header>
     <h1>Takvim</h1>
     <p class="subtitle">Etkinlik eklemek istediğiniz günün üzerinetıklayın ve şifreyi girin.</p>
   </header>
 
   <main class="calendar-shell">
     <div class="weekdays">
-      <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+      <div>Pzt</div><div>Salı</div><div>Çarş</div><div>Perş</div><div>Cuma</div><div>Cmt</div><div>Pzr</div>
     </div>
 
     <!-- scroll container so 7 columns work on mobile -->
@@ -36,9 +39,9 @@
         <p class="muted">Düzenleme yapmak için yönetici şifresini giriniz.</p>
         <div class="pw-row">
           <input type="password" id="pwInput" placeholder="Password" />
-          <button id="pwSubmit" class="btn">Unlock</button>
+          <button id="pwSubmit" class="btn">Gönder</button>
         </div>
-        <p id="pwError" class="error hidden">Wrong password.</p>
+        <p id="pwError" class="error hidden">Yanlış şifre.</p>
         <hr />
         <h3>Etkinlikler(Sadece görüntüleyenler için.)</h3>
         <div id="viewList" class="event-list-view"></div>
@@ -66,12 +69,12 @@
             <input type="text" id="evDesc" placeholder="e.g., General meeting in Room 201" required />
           </label>
           <div class="form-actions">
-            <button type="submit" class="btn primary">Add / Save</button>
-            <button type="button" id="doneEdit" class="btn">Done</button>
+            <button type="submit" class="btn primary">Ekle / Kaydet</button>
+            <button type="button" id="doneEdit" class="btn">Bitti.</button>
           </div>
         </form>
 
-        <h3>Events for the day</h3>
+        <h3>Etkinlikler</h3>
         <div id="editList" class="event-list-edit"></div>
       </section>
     </div>

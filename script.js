@@ -6,18 +6,24 @@ const WEEKS = 16;
    If today is on/after Sept 29 -> use this year's Sept 29
    else use last year's Sept 29
 */
-const today = new Date();
-const startYear =
-  today.getMonth() > 8 || (today.getMonth() === 8 && today.getDate() >= 29)
-    ? today.getFullYear()
-    : today.getFullYear() - 1;
-const START_DATE = new Date(startYear, 8, 29); // Month is 0-based: 8 = September
+const START_DATE = new Date(2025, 8, 29);
 
 
 function pad2(n) { return String(n).padStart(2, "0"); }
 function formatDMY(date) {
   return `${pad2(date.getDate())}.${pad2(date.getMonth() + 1)}.${date.getFullYear()}`;
 }
+
+// helper: go back to Monday of the week containing `d`
+// 
+function startOfWeekMonday(d){
+    const res = new Date(d);
+    const diff = (res.getDay() + 6) % 7; // 0=Sun -> 6; 1=Mon -> 0; ... 6=Sat -> 5
+    res.setDate(res.getDate() - diff);
+    res.setHours(0,0,0,0);
+    return res;
+  }
+  
 
 
 /************ STORAGE *************/
@@ -42,39 +48,40 @@ const grid = document.createElement("div");
 grid.className = "calendar-grid";
 cal.appendChild(grid);
 
-const weekdays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const weekdays = ["Pzt","Salı","Çarş","Perş","Cuma","Cmt","Pzr"];
 
+const GRID_START = startOfWeekMonday(START_DATE);
 const allData = loadAll();
 const days = []; // keep refs {el, date}
 
 for (let i = 0; i < WEEKS * 7; i++) {
-  const date = new Date(START_DATE);
-  date.setDate(START_DATE.getDate() + i);
+    const date = new Date(GRID_START);
+    date.setDate(GRID_START.getDate() + i);
+  
+    const tile = document.createElement("div");
+    tile.className = "day";
+    tile.tabIndex = 0;
+  
+    // weekday label inside the tile (auto locale)
+    const header = document.createElement("div");
+    header.className = "day-header";
+    const left = document.createElement("div");
+    left.textContent = date.toLocaleString(undefined, { weekday: "short" }); // "Mon", "Tue", ...
+    const right = document.createElement("div");
+    right.innerHTML = `<span class="day-num">${formatDMY(date)}</span>`;
+    header.append(left, right);
+  
+    const evWrap = document.createElement("div");
+    evWrap.className = "day-events";
+    tile.append(header, evWrap);
+    grid.appendChild(tile);
+  
+    tile.addEventListener("click", () => openModal(date));
+  
+    days.push({ el: tile, eventsEl: evWrap, date });
+    renderDay(date);
+  }
 
-  const tile = document.createElement("div");
-  tile.className = "day";
-  tile.tabIndex = 0;
-
-  const header = document.createElement("div");
-  header.className = "day-header";
-
-  const left = document.createElement("div");
-  left.textContent = weekdays[date.getDay()];
-  const right = document.createElement("div");
-  right.innerHTML = `<span class="day-num">${date.getDate()}</span>`;
-
-  header.append(left, right);
-  const evWrap = document.createElement("div");
-  evWrap.className = "day-events";
-
-  tile.append(header, evWrap);
-  grid.appendChild(tile);
-
-  tile.addEventListener("click", () => openModal(date));
-
-  days.push({ el: tile, eventsEl: evWrap, date });
-  renderDay(date);
-}
 
 /************ RENDER A DAY'S EVENTS *************/
 function renderDay(date) {
