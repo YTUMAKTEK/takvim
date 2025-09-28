@@ -27,7 +27,7 @@ function startOfWeekMonday(d){
 
 
 /************ STORAGE *************/
-/* ===== URL HASH STORAGE ===== */
+/* ===== URL ENCODE/DECODE (base64url) ===== */
 function toBase64Url(str){
     const b64 = btoa(unescape(encodeURIComponent(str)));
     return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -37,15 +37,27 @@ function toBase64Url(str){
     b64 += '=='.slice(0, (4 - (b64.length % 4)) % 4);
     return decodeURIComponent(escape(atob(b64)));
   }
-  function dataToHash(data){
-    const json = JSON.stringify(data);
-    return '#d=' + toBase64Url(json);
+  
+  /* read data from ?d=... or #d=... */
+  function readDataFromUrl(){
+    const u = new URL(location.href);
+    const q = u.searchParams.get('d');
+    if (q) { try { return JSON.parse(fromBase64Url(q)); } catch { return null; } }
+  
+    const m = location.hash.match(/(?:#|\?)d=([^&]+)/);
+    if (m) { try { return JSON.parse(fromBase64Url(m[1])); } catch { return null; } }
+  
+    return null;
   }
-  function hashToData(hash){
-    const m = (hash || location.hash).match(/(?:#|\?)d=([^&]+)/);
-    if (!m) return null;
-    try { return JSON.parse(fromBase64Url(m[1])); } catch { return null; }
+  
+  /* write data to the URL as ?d=... (and clear old hash) */
+  function writeDataToUrl(data){
+    const u = new URL(location.href);
+    u.searchParams.set('d', toBase64Url(JSON.stringify(data)));
+    u.hash = ''; // drop any old #d=...
+    history.replaceState(null, '', u.toString());
   }
+  
   
 const LS_KEY = "club_calendar_v1";
 function loadAll() {
