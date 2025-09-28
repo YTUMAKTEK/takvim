@@ -13,7 +13,7 @@ function pad2(n) { return String(n).padStart(2, "0"); }
 function formatDMY(date) {
   return `${pad2(date.getDate())}.${pad2(date.getMonth() + 1)}.${date.getFullYear()}`;
 }
-
+  
 // helper: go back to Monday of the week containing `d`
 // 
 function startOfWeekMonday(d){
@@ -24,10 +24,27 @@ function startOfWeekMonday(d){
     return res;
   }
   
-
+  document.getElementById('copyLink')?.addEventListener('click', async () => {
+    // Make sure URL reflects the latest data
+    writeDataToUrl(loadAll());
+    const url = location.href;
+    try {
+      if (navigator.share) await navigator.share({ title: 'Takvim', url });
+      else if (navigator.clipboard) { await navigator.clipboard.writeText(url); alert('Link copied!'); }
+      else { prompt('Copy this link:', url); }
+    } catch {}
+  });
+  
 
 /************ STORAGE *************/
 /* ===== URL ENCODE/DECODE (base64url) ===== */
+window.addEventListener('popstate', () => {
+    const data = readDataFromUrl();
+    if (!data) return;
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+    days.forEach(d => renderDay(d.date)); // re-render tiles
+  });
+  
 function toBase64Url(str){
     const b64 = btoa(unescape(encodeURIComponent(str)));
     return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -61,6 +78,13 @@ function toBase64Url(str){
   
 const LS_KEY = "club_calendar_v1";
 function loadAll() {
+  // First try to load from URL parameters
+  const urlData = readDataFromUrl();
+  if (urlData) {
+    return urlData;
+  }
+  
+  // Fall back to localStorage
   try {
     return JSON.parse(localStorage.getItem(LS_KEY)) || {};
   } catch {
@@ -69,10 +93,81 @@ function loadAll() {
 }
 function saveAll(data) {
   localStorage.setItem(LS_KEY, JSON.stringify(data));
+  writeDataToUrl(data); // keeps the address bar shareable
 }
 function keyForDate(d) {
   return d.toISOString().slice(0, 10);
 }
+
+/************ SHARE FUNCTIONALITY *************/
+const shareBtn = document.getElementById("shareBtn");
+
+shareBtn.addEventListener("click", async () => {
+  const currentUrl = window.location.href;
+  
+  try {
+    // Try to use the modern Clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(currentUrl);
+      showShareFeedback("Link copied to clipboard!");
+    } else {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = currentUrl;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      showShareFeedback("Link copied to clipboard!");
+    }
+  } catch (err) {
+    // If clipboard API fails, show the URL in a prompt
+    prompt("Copy this link to share your calendar:", currentUrl);
+  }
+});
+
+function showShareFeedback(message) {
+  const feedback = document.createElement("div");
+  feedback.textContent = message;
+  feedback.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #27ae60;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease;
+  `;
+  
+  document.body.appendChild(feedback);
+  
+  setTimeout(() => {
+    feedback.style.animation = "slideOut 0.3s ease";
+    setTimeout(() => document.body.removeChild(feedback), 300);
+  }, 2000);
+}
+
+// Add CSS for the feedback animation
+const style = document.createElement("style");
+style.textContent = `
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+  }
+`;
+document.head.appendChild(style);
 
 /************ RENDER CALENDAR *************/
 const cal = document.getElementById("calendar");

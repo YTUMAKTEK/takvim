@@ -47,9 +47,43 @@
     text-align:center;
     padding:20px 16px 8px;
     color:#fff;
+    position:relative;
   }
   .topbar h1{margin:0 0 6px;font-size:clamp(20px,4vw,28px)}
   .subtitle{margin:0;color:#e1f5ee;font-size:14px}
+  
+  /* Share button */
+  .share-btn{
+    position:absolute;
+    top:20px;
+    right:20px;
+    background:rgba(255,255,255,0.15);
+    border:1px solid rgba(255,255,255,0.3);
+    color:#fff;
+    padding:8px 12px;
+    border-radius:20px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:14px;
+    transition:all 0.2s ease;
+    backdrop-filter:blur(10px);
+  }
+  .share-btn:hover{
+    background:rgba(255,255,255,0.25);
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  }
+  .share-btn:active{
+    transform:translateY(0);
+  }
+  .share-icon{
+    font-size:16px;
+  }
+  .share-text{
+    font-weight:500;
+  }
   
   /* Shell */
   .calendar-shell{
@@ -192,10 +226,24 @@
   /* Mobile tweaks */
   @media (max-width:720px){
     .event-form{grid-template-columns:1fr 1fr; }
+    .share-btn{
+      top:15px;
+      right:15px;
+      padding:6px 10px;
+      font-size:13px;
+    }
+    .share-text{
+      display:none;
+    }
   }
   @media (max-width:520px){
     .weekdays{grid-template-columns:repeat(7,140px); overflow-x:auto}
     .calendar-grid{grid-template-columns:repeat(7,140px)}
     .day{min-height:130px}
+    .share-btn{
+      top:10px;
+      right:10px;
+      padding:6px 8px;
+    }
   }
   
