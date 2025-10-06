@@ -26,7 +26,6 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-
 /************ FIREBASE SETUP *************/
 let db = null;
 let calendarId = null;
